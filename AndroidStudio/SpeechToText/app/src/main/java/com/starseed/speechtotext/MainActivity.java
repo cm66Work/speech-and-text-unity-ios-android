@@ -106,17 +106,20 @@ public class MainActivity extends UnityPlayerActivity
         }
         @Override
         public void onResults(Bundle results) {
-            ArrayList<String> text = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            UnityPlayer.UnitySendMessage("SpeechToText", "onResults", text.get(0));
+            ArrayList<String> result = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            if (result != null && !result.isEmpty()) {
+                UnityPlayer.UnitySendMessage("SpeechToText", "onResults", result.get(0));
+            }
         }
         @Override
         public void onPartialResults(Bundle partialResults) {
-            ArrayList<String> text = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            UnityPlayer.UnitySendMessage("SpeechToText", "onPartialResults", text.get(0));
+            ArrayList<String> result = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            if (result != null && !result.isEmpty()) {
+                UnityPlayer.UnitySendMessage("SpeechToText", "onPartialResults", result.get(0));
+            }
         }
         @Override
         public void onEvent(int eventType, Bundle params) {
-
             UnityPlayer.UnitySendMessage("SpeechToText", "onMessage", "onEvent");
         }
     };
