@@ -7,8 +7,12 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
+
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -18,6 +22,10 @@ public class MainActivity extends UnityPlayerActivity
     private TextToSpeech tts;
     private SpeechRecognizer speech;
     private Intent intent;
+
+    private final String FILENAME = "/wpta_tts.wav";
+    private boolean fileCreated = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +61,8 @@ public class MainActivity extends UnityPlayerActivity
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Bridge.languageSpeech);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, Bridge.languageSpeech);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Bridge.languageSpeech);
-        //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 2000);
-        intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000);
+        //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1000);
+        //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000);
         //intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000);
         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
@@ -107,6 +115,7 @@ public class MainActivity extends UnityPlayerActivity
         @Override
         public void onResults(Bundle results) {
             ArrayList<String> result = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            Log.i("Unity", "TEST: " + results);
             if (result != null && !result.isEmpty()) {
                 UnityPlayer.UnitySendMessage("SpeechToText", "onResults", result.get(0));
             }
@@ -125,10 +134,18 @@ public class MainActivity extends UnityPlayerActivity
     };
 
 
-    ////
+    //// Text To Speech
     public  void OnStartSpeak(String valueText)
     {
+        fileCreated = false;
         tts.speak(valueText, TextToSpeech.QUEUE_FLUSH, null, valueText);
+    }
+    public void OnStartSpeakFile(String valueText, String path)
+    {
+        fileCreated = true;
+        Bundle bundle = new Bundle();
+        File file = new File(path+FILENAME);
+        tts.synthesizeToFile(valueText, bundle, file, valueText);
     }
     public void OnSettingSpeak(String language, float pitch, float rate) {
         tts.setPitch(pitch);
@@ -164,7 +181,25 @@ public class MainActivity extends UnityPlayerActivity
         }
         @Override
         public void onDone(String utteranceId) {
-            UnityPlayer.UnitySendMessage("TextToSpeech", "onDone", utteranceId);
+            if(!fileCreated)
+                UnityPlayer.UnitySendMessage("TextToSpeech", "onDone", utteranceId);
+            else
+                UnityPlayer.UnitySendMessage("TextToSpeech", "onDoneFile", utteranceId);
+        }
+        @Override
+        public void onBeginSynthesis (String utteranceId, int sampleRateInHz, int audioFormat, int channelCount)
+        {
+            String outputData = utteranceId +",";
+            outputData += sampleRateInHz + ",";
+            outputData += audioFormat + ",";
+            outputData += channelCount;
+            UnityPlayer.UnitySendMessage("TextToSpeech", "onBeginSynthesis", outputData);
+        }
+        @Override
+        public void onAudioAvailable (String utteranceId, byte[] audio)
+        {
+            String outputData = utteranceId;
+            UnityPlayer.UnitySendMessage("TextToSpeech", "onAudioAvailable", outputData);
         }
     };
 

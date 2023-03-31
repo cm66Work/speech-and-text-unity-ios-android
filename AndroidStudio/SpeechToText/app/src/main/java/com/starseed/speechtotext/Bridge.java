@@ -41,6 +41,11 @@ public class Bridge {
         MainActivity activity = (MainActivity)UnityPlayer.currentActivity;
         activity.OnStartSpeak(text);
     }
+    public static void OpenTextToFile(String text, String path)
+    {
+        MainActivity activity = (MainActivity)UnityPlayer.currentActivity;
+        activity.OnStartSpeakFile(text, path);
+    }
     public static void SettingTextToSpeed(String language, float pitch, float rate) {
         MainActivity activity = (MainActivity)UnityPlayer.currentActivity;
         activity.OnSettingSpeak(language, pitch, rate);
