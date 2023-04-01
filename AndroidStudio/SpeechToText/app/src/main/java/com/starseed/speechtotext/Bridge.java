@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.speech.RecognizerIntent;
 import com.unity3d.player.UnityPlayer;
 
+import java.io.File;
+
 /**
  * Created by J1mmyTo9
  */
@@ -41,10 +43,10 @@ public class Bridge {
         MainActivity activity = (MainActivity)UnityPlayer.currentActivity;
         activity.OnStartSpeak(text);
     }
-    public static void OpenTextToFile(String text, String path)
+    public static void OpenTextToFile(String text, String filePath)
     {
         MainActivity activity = (MainActivity)UnityPlayer.currentActivity;
-        activity.OnStartSpeakFile(text, path);
+        activity.OnStartSpeakFile(text, filePath);
     }
     public static void SettingTextToSpeed(String language, float pitch, float rate) {
         MainActivity activity = (MainActivity)UnityPlayer.currentActivity;

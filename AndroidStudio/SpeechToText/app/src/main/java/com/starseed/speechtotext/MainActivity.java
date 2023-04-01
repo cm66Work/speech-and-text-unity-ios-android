@@ -2,6 +2,7 @@ package com.starseed.speechtotext;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -14,6 +15,7 @@ import com.unity3d.player.UnityPlayerActivity;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Locale;
 
 
@@ -23,7 +25,6 @@ public class MainActivity extends UnityPlayerActivity
     private SpeechRecognizer speech;
     private Intent intent;
 
-    private final String FILENAME = "/wpta_tts.wav";
     private boolean fileCreated = false;
 
     @Override
@@ -140,11 +141,13 @@ public class MainActivity extends UnityPlayerActivity
         fileCreated = false;
         tts.speak(valueText, TextToSpeech.QUEUE_FLUSH, null, valueText);
     }
-    public void OnStartSpeakFile(String valueText, String path)
+    public void OnStartSpeakFile(String valueText, String filePath)
     {
         fileCreated = true;
         Bundle bundle = new Bundle();
-        File file = new File(path+FILENAME);
+
+        File file = new File(filePath);
+
         tts.synthesizeToFile(valueText, bundle, file, valueText);
     }
     public void OnSettingSpeak(String language, float pitch, float rate) {
@@ -189,16 +192,14 @@ public class MainActivity extends UnityPlayerActivity
         @Override
         public void onBeginSynthesis (String utteranceId, int sampleRateInHz, int audioFormat, int channelCount)
         {
-            String outputData = utteranceId +",";
-            outputData += sampleRateInHz + ",";
-            outputData += audioFormat + ",";
-            outputData += channelCount;
+            String outputData = String.join("," , utteranceId, sampleRateInHz+"", audioFormat+"",channelCount+"");
             UnityPlayer.UnitySendMessage("TextToSpeech", "onBeginSynthesis", outputData);
         }
         @Override
         public void onAudioAvailable (String utteranceId, byte[] audio)
         {
-            String outputData = utteranceId;
+            String encodedString = Base64.getEncoder().encodeToString(audio);
+            String outputData = utteranceId + "," + encodedString;
             UnityPlayer.UnitySendMessage("TextToSpeech", "onAudioAvailable", outputData);
         }
     };
